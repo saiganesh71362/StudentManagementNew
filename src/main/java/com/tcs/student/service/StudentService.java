@@ -6,11 +6,11 @@ import com.tcs.student.entity.StudentData;
 
 public interface StudentService 
 {
-	public String addNewStudent( StudentData studentData);
+	public StudentData addNewStudent( StudentData studentData);
 	public List<StudentData> getAllStudents();
-	public StudentData getStudentById(Integer id);
-	public String updateStudentById(StudentData studentData , Integer id);
-	public String deleteStudentById(Integer id);
-	public String deleteAllStudents();
+	public StudentData getStudentById(Integer id) throws Exception;
+	public StudentData updateStudentById(StudentData studentData , Integer id) throws Exception;
+	public void deleteStudentById(Integer id);
+	public void deleteAllStudents();
 
 }
