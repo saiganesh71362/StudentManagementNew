@@ -6,7 +6,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.tcs.student.appconstants.AppConstants;
 import com.tcs.student.entity.StudentData;
+import com.tcs.student.exceptionhandle.EntityNotFoundException;
+import com.tcs.student.exceptionhandle.StudentNotFoundException;
 import com.tcs.student.repositoy.StudentRepository;
 import com.tcs.student.service.StudentService;
 
@@ -23,9 +26,20 @@ public class ServiceImplementation  implements StudentService{
 	@Autowired
 	private StudentRepository studentRepository;
 	@Override
-	public StudentData addNewStudent(StudentData studentData) {
-		StudentData save = studentRepository.save(studentData);
-		return save;
+	public String addNewStudent(StudentData studentData)
+	{
+	    if (studentData.getId() == null) {
+	        StudentData savedStudent = studentRepository.save(studentData);
+	        return AppConstants.NEW_STUDENT_CREATE + savedStudent.getId();
+	    } else {
+	        Optional<StudentData> byId = studentRepository.findById(studentData.getId());
+	        if (byId.isPresent()) {
+	            return AppConstants.STUDENT_ID_ALREADY_EXIST + studentData.getId();
+	        } else {
+	            StudentData savedStudent = studentRepository.save(studentData);
+	            return AppConstants.NEW_STUDENT_CREATE + savedStudent.getId();
+	        }  
+	    }
 	}
 
 	@Override
@@ -41,7 +55,7 @@ public class ServiceImplementation  implements StudentService{
 	    if (byId.isPresent()) {
 	        return byId.get();
 	    } else {
-	        throw new Exception("Student not found with id: " + id);
+	        throw new StudentNotFoundException(AppConstants.STUDENT_ID_NOT_FOUND + id);
 	    }
 	}
 	
@@ -64,11 +78,10 @@ public class ServiceImplementation  implements StudentService{
 	        updatedStudent.setAddress(studentData.getAddress());
 	        updatedStudent.setBranch(studentData.getBranch());
 	        updatedStudent.setJoinYear(studentData.getJoinYear());
-	        updatedStudent.setUpdatedBy(studentData.getUpdatedBy());
 	        // Add other fields to update here
 	        return studentRepository.save(updatedStudent);
 	    } else {
-	        throw new Exception("Student not found with id: " + id);
+	        throw new EntityNotFoundException(AppConstants.STUDENT_ID_NOT_FOUND + id);
 	        
 //	        EntityNotFoundException
 	    }
@@ -76,14 +89,17 @@ public class ServiceImplementation  implements StudentService{
 	
 
 	@Override
-	public void deleteStudentById(Integer id) {
+	public String deleteStudentById(Integer id) {
 		
-		studentRepository.deleteById(id);
+		Optional<StudentData> byId = studentRepository.findById(id);
+		if(byId.isPresent())
+		{
+			studentRepository.deleteById(id);
+			return AppConstants.DELETE_STUDENT+id;
+		}
+		return AppConstants.NO_RECORDS+id;
+		
 	}
 
-	@Override
-	public void deleteAllStudents() {
-			studentRepository.deleteAll();
-	}
 
 }
