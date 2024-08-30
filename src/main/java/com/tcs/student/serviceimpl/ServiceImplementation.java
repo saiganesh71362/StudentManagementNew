@@ -21,85 +21,73 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class ServiceImplementation  implements StudentService{
+public class ServiceImplementation implements StudentService {
 
 	@Autowired
 	private StudentRepository studentRepository;
+
 	@Override
-	public String addNewStudent(StudentData studentData)
-	{
-	    if (studentData.getId() == null) {
-	        StudentData savedStudent = studentRepository.save(studentData);
-	        return AppConstants.NEW_STUDENT_CREATE + savedStudent.getId();
-	    } else {
-	        Optional<StudentData> byId = studentRepository.findById(studentData.getId());
-	        if (byId.isPresent()) {
-	            return AppConstants.STUDENT_ID_ALREADY_EXIST + studentData.getId();
-	        } else {
-	            StudentData savedStudent = studentRepository.save(studentData);
-	            return AppConstants.NEW_STUDENT_CREATE + savedStudent.getId();
-	        }  
-	    }
+	public String addNewStudent(StudentData studentData) {
+		Optional<StudentData> byId = studentRepository.findById(studentData.getId());
+		if (byId.isPresent()) {
+			return AppConstants.STUDENT_ID_ALREADY_EXIST + studentData.getId();
+		} else {
+			StudentData savedStudent = studentRepository.save(studentData);
+			return AppConstants.NEW_STUDENT_CREATE + savedStudent.getId();
+		}
 	}
 
 	@Override
 	public List<StudentData> getAllStudents() {
-		List<StudentData> all = studentRepository.findAll();
-		return all;
+		return studentRepository.findAll();
+
 	}
 
-	//   44 line exception change to custom exception
+	// 44 line exception change to custom exception
 	@Override
-	public StudentData getStudentById(Integer id) throws Exception {
-	    Optional<StudentData> byId = studentRepository.findById(id);
-	    if (byId.isPresent()) {
-	        return byId.get();
-	    } else {
-	        throw new StudentNotFoundException(AppConstants.STUDENT_ID_NOT_FOUND + id);
-	    }
+	public StudentData getStudentById(Integer id) throws StudentNotFoundException {
+		Optional<StudentData> byId = studentRepository.findById(id);
+		if (byId.isPresent()) {
+			return byId.get();
+		} else {
+			throw new StudentNotFoundException(AppConstants.STUDENT_ID_NOT_FOUND + id);
+		}
 	}
-	
-	
+
 //	@Override
 //	public StudentData getStudentById(Integer id) {
 //	    return studentRepository.findById(id)
 //	        .orElseThrow(() -> new StudentNotFoundException("Student not found with id: " + id));
 //	}
 
-
-
 	@Override
-	public StudentData updateStudentById(StudentData studentData, Integer id) throws Exception {
-	    Optional<StudentData> existingStudent = studentRepository.findById(id);
-	    if (existingStudent.isPresent()) {
-	        StudentData updatedStudent = existingStudent.get();
-	        updatedStudent.setName(studentData.getName()); // Update other fields as necessary
-	        updatedStudent.setContact(studentData.getContact());   // Example fields
-	        updatedStudent.setAddress(studentData.getAddress());
-	        updatedStudent.setBranch(studentData.getBranch());
-	        updatedStudent.setJoinYear(studentData.getJoinYear());
-	        // Add other fields to update here
-	        return studentRepository.save(updatedStudent);
-	    } else {
-	        throw new EntityNotFoundException(AppConstants.STUDENT_ID_NOT_FOUND + id);
-	        
-//	        EntityNotFoundException
-	    }
-	}
-	
+	public StudentData updateStudentById(StudentData studentData, Integer id) throws StudentNotFoundException {
+		Optional<StudentData> existingStudent = studentRepository.findById(id);
+		if (existingStudent.isPresent()) {
+			StudentData updatedStudent = existingStudent.get();
+			updatedStudent.setName(studentData.getName()); // Update other fields as necessary
+			updatedStudent.setContact(studentData.getContact()); // Example fields
+			updatedStudent.setAddress(studentData.getAddress());
+			updatedStudent.setBranch(studentData.getBranch());
+			updatedStudent.setJoinYear(studentData.getJoinYear());
+			// Add other fields to update here
+			return studentRepository.save(updatedStudent);
+		} else {
+			throw new StudentNotFoundException(AppConstants.STUDENT_ID_NOT_FOUND + id);
 
-	@Override
-	public String deleteStudentById(Integer id) {
-		
-		Optional<StudentData> byId = studentRepository.findById(id);
-		if(byId.isPresent())
-		{
-			studentRepository.deleteById(id);
-			return AppConstants.DELETE_STUDENT+id;
 		}
-		return AppConstants.NO_RECORDS+id;
-		
 	}
 
+	@Override
+	public String deleteStudentById(Integer id) throws StudentNotFoundException {
+
+		Optional<StudentData> byId = studentRepository.findById(id);
+		if (byId.isPresent()) {
+			studentRepository.deleteById(id);
+			return AppConstants.DELETE_STUDENT + id;
+		}
+		throw new StudentNotFoundException("There is no record with ID: " + id);
+
+	}
 
 }

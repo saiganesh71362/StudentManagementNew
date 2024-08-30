@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tcs.student.entity.StudentData;
+import com.tcs.student.exceptionhandle.StudentNotFoundException;
 import com.tcs.student.service.StudentService;
 
 import lombok.AllArgsConstructor;
@@ -40,14 +41,14 @@ public class StudentController {
 	public ResponseEntity<StudentData> getStudentById(@PathVariable Integer id) throws Exception
 	{
 		StudentData studentById = studentService.getStudentById(id);
-		return new ResponseEntity<StudentData>(studentById,HttpStatus.OK);
+		return new ResponseEntity<StudentData>(studentById,HttpStatus.FOUND);
 		
 	}
 	@GetMapping("/allStudents")
-    public ResponseEntity<List<StudentData>>	getAllStudents()
+    public ResponseEntity<List<StudentData>> getAllStudents()
 	{
 		List<StudentData> allStudents = studentService.getAllStudents();
-		return new ResponseEntity<List<StudentData>>(allStudents,HttpStatus.OK);
+		return new ResponseEntity<List<StudentData>>(allStudents,HttpStatus.FOUND);
 	}
 	
 	@PutMapping("/updateStudent/{id}")
@@ -59,7 +60,7 @@ public class StudentController {
 	}
 	
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<String>  deleteStudentById(@PathVariable Integer id)
+	public ResponseEntity<String>  deleteStudentById(@PathVariable Integer id) throws StudentNotFoundException
 	{
 		 String deleteStudentById = studentService.deleteStudentById(id);
 		 
